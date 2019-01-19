@@ -4,6 +4,7 @@
   "description": "'Capstone for Node unit'",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
     "test": "mocha"
   },
   "author": "",
