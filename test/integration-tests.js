@@ -9,7 +9,7 @@ const { app, runServer, closeServer } = require('../server');
 
 chai.use(chaiHttp);
 
-describe('Hello world page', function() {
+describe('html pages', function() {
 
     before(function() {
         return runServer();
@@ -19,15 +19,40 @@ describe('Hello world page', function() {
         return closeServer();
     })
 
-    it('should have HTML and status 200', function() {
-        
-        let res;
-
-        return chai.request(app)
-        .get('/')
-        .then(function(_res) {
-            res = _res;
-            expect(res).to.have.status(200);
+    describe('index.html', function() {
+        it('should have HTML and status 200', function() {
+            let res;
+            return chai.request(app)
+            .get('/index.html')
+            .then(function(_res) {
+                res = _res;
+                expect(res).to.have.status(200);
+            });
         });
     });
+
+    describe('recipePage.html', function() {
+        it('should have HTML and status 200', function() {
+            let res;
+            return chai.request(app)
+            .get('/index.html')
+            .then(function(_res) {
+                res = _res;
+                expect(res).to.have.status(200);
+            });
+        });
+    });
+
+    describe('userPage.html', function() {
+        it('should have HTML and status 200', function() {
+            let res;
+            return chai.request(app)
+            .get('/index.html')
+            .then(function(_res) {
+                res = _res;
+                expect(res).to.have.status(200);
+            });
+        });
+    });
+    
 });
