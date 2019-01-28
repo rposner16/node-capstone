@@ -106,6 +106,7 @@ function renderSingleRecipe(recipeObj) {
         $('.commentSection').append(
             `<div class="comment">
                 <p>${commentObj.author}: ${commentObj.content}</p>
+                <p>${commentObj.author}: ${commentObj.text}</p>
             </div>`
         );
     }
@@ -153,7 +154,6 @@ function renderSearchResults(searchResults) {
         event.preventDefault();
         // Clear out page so that recipe can be visible
         $('.search-container').empty();
-
         // Get recipe's id and pass it into getSingleRecipe 
         let a = $(event.currentTarget);
         let recipeId = a.attr('id');
@@ -218,4 +218,3 @@ function watchRecipeSearch() {
 }
 
 watchRecipeSearch();
-
