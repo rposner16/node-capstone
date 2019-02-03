@@ -12,9 +12,26 @@ const { TEST_DATABASE_URL } = require('../config');
 
 chai.use(chaiHttp);
 
+/*function seedAuthorData() {
+    //console.info('Seeding author data');
+    let a = [];
+    for (let i = 0; i < 10; i++) {
+        a.push(generateAuthorData());
+    }
+    return Author.insertMany(a);
+}*/
+
+function generateAuthorData() {
+    return {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        userName: faker.random.word()
+    };
+}
+
 function seedRecipeData() {
     console.info('Seeding recipe data');
-    const seedData = [];
+    let seedData = [];
     for (let i = 0; i < 10; i++) {
         seedData.push(generateRecipeData());
     }
@@ -22,17 +39,14 @@ function seedRecipeData() {
 }
 
 function generateRecipeData() {
-  return {
-    name: faker.random.word(),
-    author: {
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        userName: faker.random.word()
-    },
-    ingredients: generateIngredients(),
-    content: faker.lorem.paragraph(),
-    comments: generateComments()
-  };
+    //let newAuthor = generateAuthorData();
+    return {
+        name: faker.random.word(),
+        ingredients: generateIngredients(),
+        content: faker.lorem.paragraph(),
+        comments: generateComments(),
+        author: generateAuthorData() //faker.random.word()
+    };
 }
 
 function generateIngredients() {
@@ -47,12 +61,7 @@ function generateComments() {
     let commArr = [];
     for (let i = 0; i < 5; i++) {
         let commObj = {
-            content: faker.lorem.sentence(),
-            author: {
-                firstName: faker.name.firstName(),
-                lastName: faker.name.lastName(),
-                userName: faker.random.word()
-            }
+            content: faker.lorem.sentence()
         };
         commArr.push(commObj);
     }
@@ -69,6 +78,10 @@ describe('html pages and endpoints', function() {
     before(function() {
         return runServer(TEST_DATABASE_URL);
     });
+
+    /*beforeEach(function() {
+        return seedAuthorData();
+    })*/
 
     beforeEach(function() {
         return seedRecipeData();
@@ -118,6 +131,29 @@ describe('html pages and endpoints', function() {
         });
     });
 
+    /*describe('GET authors', function() {
+        let res;
+        it('should return all authors', function() {
+            return chai.request(app)
+            .get('/authors')
+            .then(function(_res) {
+                res = _res;
+                expect(res).to.have.status(200);
+                expect(res.body).to.have.lengthOf.at.least(1);
+                res.body.forEach(function(author) {
+                    expect(author).to.be.a('object');
+                    //console.log(Object.keys(author));
+                    expect(author).to.include.keys('__v','_id', 'firstName', 'lastName', 'userName');
+                });
+                return Author.findOne();
+            })
+            .then(function(author) {
+                //console.log(Object.entries(author));
+                console.log(author._doc._id);
+            });
+        });
+    });*/
+
     describe('GET all recipes endpoint', function() {
         
         it('should return all recipes in the database', function() {
@@ -149,6 +185,7 @@ describe('html pages and endpoints', function() {
                 return Recipe.findById(resRecipe.id);
             })
             .then(function(recipe) {
+                //console.log(recipe);
                 expect(resRecipe.id).to.equal(recipe.id);
                 expect(resRecipe.name).to.equal(recipe.name);
                 expect(resRecipe.author.firstName).to.equal(recipe.author.firstName);
@@ -183,13 +220,79 @@ describe('html pages and endpoints', function() {
                 expect(resRecipe.ingredients[0]).to.equal(recipe.ingredients[0]);
                 expect(resRecipe.content).to.equal(recipe.content);
                 expect(resRecipe.comments[0].content).to.equal(recipe.comments[0].content);
-            })
+            });
         });
     });
 
-    /*describe('POST a new recipe endpoint', function() {
+    describe('POST a new recipe endpoint', function() {
 
-    });*/
+        it('should create a new recipe', function() {
+            let resRecipe;
+            let newRecipe = generateRecipeData();
+            
+            return chai.request(app)
+            .post('/recipes/myrecipes')
+            .send(newRecipe)
+            .then(function(res) {
+                expect(res).to.have.status(201);
+                expect(res).to.be.json;
+                expect(res.body).to.be.a('object');
+                expect(res.body).to.include.keys('id', 'name', 'author', 'ingredients', 'content', 'comments');
+                expect(res.body.name).to.equal(newRecipe.name);
+                expect(res.body.id).to.not.be.null;
+                expect(res.body.author.firstName).to.equal(newRecipe.author.firstName);
+                expect(res.body.ingredients[0]).to.equal(newRecipe.ingredients[0]);
+                expect(res.body.content).to.equal(newRecipe.content);
+            });
+        });
+    });
+
+    describe('PUT endpoint for editing an existing recipe', function() {
+
+        it('should update fields that you send over for a specific recipe', function() {
+            const updateData = {
+                content: "jfefjioewfjeoiwjf",
+                name: "newName"
+            };
+
+            return Recipe.findOne()
+            .then(function(recipe) {
+                updateData.id = recipe.id;
+                return chai.request(app)
+                .put(`/recipes/myrecipes/${recipe.id}`)
+                .send(updateData);
+            })
+            .then(function(res) {
+                expect(res).to.have.status(204);
+                return Recipe.findById(updateData.id);
+            })
+            .then(function(recipe) {
+                expect(recipe.name).to.equal(updateData.name);
+                expect(recipe.content).to.equal(updateData.content);
+            });
+        });
+    });
+
+    describe('DELETE endpoint for deleting a recipe', function() {
+
+        it('should delete a recipe', function() {
+            let recipe;
+            
+            return Recipe.findOne()
+            .then(function(_recipe) {
+                recipe = _recipe;
+                return chai.request(app)
+                .delete(`/recipes/myrecipes/${recipe.id}`);
+            })
+            .then(function(res) {
+                expect(res).to.have.status(204);
+                return Recipe.findById(recipe.id);
+            })
+            .then(function(_recipe) {
+                expect(_recipe).to.be.null;
+            });
+        });
+    });
     
 });
 

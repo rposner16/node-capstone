@@ -2,23 +2,26 @@
 
 const mongoose = require('mongoose');
 
-const authorSchema = mongoose.Schema({
+/*const authorSchema = mongoose.Schema({
     firstName: {type: String, required: true},
     lastName: {type: String, required: true},
-    userName: {type: String, required: true /*unique: true*/}
-});
+    userName: {type: String, required: true /*unique: true}
+});*/
 
 const commentSchema = mongoose.Schema({
-    content: {type: String, required: true},
-    author: {authorSchema}
+    content: {type: String, required: true}
 });
 
 const recipeSchema = mongoose.Schema({
     name: {type: String, required: true},
-    author: {authorSchema},
     ingredients: {type: Array, required: true},
     content: {type: String, required: true},
-    comments: [commentSchema]
+    comments: [commentSchema],
+    author: {
+        firstName: {type: String, required: true},
+        lastName: {type: String, required: true},
+        userName: {type: String, required: true}
+    }
 });
 
 // Pre hooks
@@ -30,12 +33,12 @@ const recipeSchema = mongoose.Schema({
 recipeSchema.pre("findOne", function(next) {
     this.populate("author");
     next();
-});*/
+});
 
 // Virtual
-recipeSchema.virtual("authorName").get(function() {
+/*recipeSchema.virtual("authorName").get(function() {
     return `${this.author.firstName} ${this.author.lastName}`.trim();
-});
+});*/
 
 // Instance methods
 recipeSchema.methods.serialize = function() {
@@ -44,7 +47,7 @@ recipeSchema.methods.serialize = function() {
         name: this.name,
         ingredients: this.ingredients, 
         content: this.content,
-        author: this.authorName,
+        author: this.author,
         comments: this.comments
     }
 }
@@ -57,8 +60,8 @@ recipeSchema.methods.serialize = function() {
     };
 };*/
 
-const Author = mongoose.model("Author", authorSchema);
+//const Author = mongoose.model("Author", authorSchema);
 const Recipe = mongoose.model("Recipe", recipeSchema);
 const Comments = mongoose.model("Comments", commentSchema);
 
-module.exports = { Recipe, Author, Comments };
+module.exports = { Recipe, Comments };

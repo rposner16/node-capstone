@@ -44,6 +44,17 @@ app.get('/recipes/search', (req, res) => {
   });
 });
 
+app.get('/authors', (req, res) => {
+  Author.find()
+  .then(athrs => {
+    res.json(athrs);
+  })
+  .catch(err => {
+    console.error(err);
+    res.status(500).json({message: 'Internal server error'});
+  });
+});
+
 // Get an individual recipe by its id
 app.get('/recipes/:id', (req, res) => {
   const recipeId = req.params.id;
@@ -61,8 +72,8 @@ app.get('/recipes/:id', (req, res) => {
 app.post('/recipes/myrecipes', (req, res) => {
 
   // Making sure that request body has the required fields
-  const requiredFields = ["name", "ingredients", "content", "author_id"];
-  for (let i = 0; i < 3; i++) {
+  const requiredFields = ["name", "ingredients", "content", "author"];
+  for (let i = 0; i < 4; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
       const message = `Missing \`${field}\` in request body`;
@@ -73,7 +84,7 @@ app.post('/recipes/myrecipes', (req, res) => {
 
   Recipe.create({
     name: req.body.name,
-    author: req.body.author_id,
+    author: req.body.author,
     ingredients: req.body.ingredients,
     content: req.body.content
   })
@@ -82,6 +93,39 @@ app.post('/recipes/myrecipes', (req, res) => {
     console.error(err);
     res.status(500).json({message: 'Internal server error'});
   });  
+});
+
+app.put('/recipes/myrecipes/:id', (req, res) => {
+
+  if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+    const message = `Request path id (${req.params.id}) and request body id (${req.body.id}) must match.`;
+    console.error(message);
+    return res.status(400).json({message: message});
+  }
+
+  const toBeUpdated = {};
+  const updateableFields = ["name", "ingredients", "content"];
+  updateableFields.forEach(field => {
+    if (field in req.body) {
+      toBeUpdated[field] = req.body[field];
+    }
+  });
+
+  Recipe.findByIdAndUpdate(req.params.id, { $set: toBeUpdated })
+  .then(recipe => res.status(204).json(recipe.serialize()))
+  .catch(err => {
+    res.status(500).json({ message: "Internal server error" });
+  });
+});
+
+app.delete('/recipes/myrecipes/:id', (req, res) => {
+  Recipe.findByIdAndRemove(req.params.id)
+  .then(recipe => {
+    res.status(204).end();
+  })
+  .catch(err => {
+    res.status(500).json({ message: "Internal server error" });
+  });
 });
 
 
