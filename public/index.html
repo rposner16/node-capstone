@@ -7,9 +7,15 @@
         <title>Homepage</title>
     </head>
     <body>
-        <a href="/userPage.html">My recipes</a>
-        
+        <header>
+            <button type="button" class="homepage-button">Home</button>
+            <button type="button" class="user-recipes-button">My recipes</button>
+        </header>
+
         <div class="search-container">
+            <form>
+                <button type="button" class="js-all-recipes">See all recipes</button>
+            </form>
             <h1>Search for recipes: </h1>
             <form class="recipe-search-form">
                 <label for="search-bar">Enter an ingredient or category: </label>
@@ -20,10 +26,13 @@
             </div>
         </div>
 
-        <div class="recipe-container">
+        <div class="single-recipe-container">
+        </div>
+        
+        <div class="user-recipes-container">
         </div>
         
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=" crossorigin="anonymous"></script>
-        <script src="../app.js"></script>
+        <script src="app.js"></script>
     </body>
 </html>

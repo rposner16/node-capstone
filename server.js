@@ -32,7 +32,23 @@ app.get('/recipes', (req, res) => {
 app.get('/recipes/search', (req, res) => {
   const searchTerm = req.query.searchQuery;
   // Fix find part once you figure out how to query database correctly
-  Recipe.find(searchTerm)
+  let rgx = new RegExp(searchTerm);
+  Recipe.find( { name: { $regex: rgx, $options: 'i' } } )
+  .then(recipes => {
+    res.json(recipes.map(recipe => {
+      return recipe.serialize();
+    }));
+  })
+  .catch(err => {
+    console.error(err);
+    res.status(500).json({message: 'Internal server error'});
+  });
+});
+
+app.get('/recipes/user', (req, res) => {
+  const searchTerm = req.query.userQuery;
+  let rgx = new RegExp(searchTerm);
+  Recipe.find( { "author.userName": { $regex: rgx } } )
   .then(recipes => {
     res.json(recipes.map(recipe => {
       return recipe.serialize();
@@ -104,7 +120,7 @@ app.put('/recipes/myrecipes/:id', (req, res) => {
   }
 
   const toBeUpdated = {};
-  const updateableFields = ["name", "ingredients", "content"];
+  const updateableFields = ["name", "ingredients", "content", "comments"];
   updateableFields.forEach(field => {
     if (field in req.body) {
       toBeUpdated[field] = req.body[field];

@@ -9,7 +9,12 @@ const mongoose = require('mongoose');
 });*/
 
 const commentSchema = mongoose.Schema({
-    content: {type: String, required: true}
+    content: {type: String, required: true},
+    author: {
+        firstName: {type: String, required: true},
+        lastName: {type: String, required: true},
+        userName: {type: String, required: true}
+    }
 });
 
 const recipeSchema = mongoose.Schema({
