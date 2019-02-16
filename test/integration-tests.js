@@ -61,7 +61,8 @@ function generateComments() {
     let commArr = [];
     for (let i = 0; i < 5; i++) {
         let commObj = {
-            content: faker.lorem.sentence()
+            content: faker.lorem.sentence(),
+            author: generateAuthorData()
         };
         commArr.push(commObj);
     }
