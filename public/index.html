@@ -5,25 +5,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>Homepage</title>
+        <link rel="stylesheet" href="float-grid.css">
+        <link rel="stylesheet" href="index.css">
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     </head>
     <body>
         <header>
-            <button type="button" class="homepage-button">Home</button>
-            <button type="button" class="user-recipes-button">My recipes</button>
+            <div class="header-container">
+                <h1 class="homepage-button">Home</h1>
+                <p class="user-recipes-button">My recipes</p>
+            </div>
         </header>
 
-        <div class="search-container">
-            <form>
-                <button type="button" class="js-all-recipes">See all recipes</button>
-            </form>
-            <h1>Search for recipes: </h1>
-            <form class="recipe-search-form">
-                <label for="search-bar">Enter an ingredient or category: </label>
-                <input type="text" name="search-bar" id="js-search-bar" required>
-                <button type="submit" class="js-search-submit">Submit</button>
-            </form>
-            <div class="search-results-container">
+        <div class="search-container row">
+            <div class="col-12">
+                <h2>Find new recipes and share your own.</h2>
+                <form class="see-all">
+                    <button type="button" class="js-all-recipes">See all recipes</button>
+                </form>
+                <form class="recipe-search-form">
+                    <label for="search-bar">Search for recipes: </label>
+                    <input type="text" name="search-bar" id="js-search-bar" required>
+                    <button type="submit" class="js-search-submit">Submit</button>
+                </form>
             </div>
+        </div>
+
+        <div class="search-results-container row">
         </div>
 
         <div class="single-recipe-container">

@@ -1,0 +1,102 @@
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: url(https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-1.2.1&auto=format&fit=crop&w=631&q=80) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+body {
+    margin: 0px;
+    font-family: 'Lato', sans-serif;
+}
+
+header {
+    background-color: rebeccapurple;
+    padding: 0 10px;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.homepage-button, .user-recipes-button {
+    display: inline;
+    cursor: pointer;
+    color: white;
+}
+
+.white-text {
+    color: white;
+    text-shadow: 2px 2px 2px black;
+}
+
+.white-text, .js-create-recipe-form {
+    margin-left: 10px;
+}
+
+.search-container {
+    text-align: center;
+}
+
+.see-all {
+    padding-bottom: 10px;
+}
+
+/*.single-recipe-container, .user-recipes-container {
+    padding-left: 25px;
+}*/
+
+.recipe-div, .js-recipe-result {
+    border-style: double;
+    border-color: steelblue; 
+    background-color: white;
+}
+
+.js-create-recipe-form {
+    background-color: white;
+    padding: 10px;
+    display: none;
+}
+
+.js-recipe-result {
+    text-align: center;
+}
+
+.recipe-div {
+    padding: 15px;
+    margin: 10px;
+}
+
+button, input, textarea {
+    border-width: 1px;
+    border-color: gainsboro;
+}
+
+.form-input {
+    margin: 0;
+}
+
+textarea {
+    display: block;
+    height: 75px; 
+    width: 220px;
+}
+
+.delete-recipe {
+    border-width: 1px;
+    border-radius: 2px;
+    border-color: tomato;
+    color: orangered;
+}
+
+.js-create-recipe-button {
+    margin: 10px;
+}

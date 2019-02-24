@@ -1,81 +1,5 @@
 'use strict'
 
-const MOCK_RECIPES = {
-    "recipes": [
-        {
-            "id": "111",
-            "name": "Chocolate chip cookies",
-            "ingredients": ["flour", "eggs", "baking powder", "sugar", "chocolate chips", "vanilla", "salt", "butter"],
-            "content": "djfioaew;goewhgijeiowejfijwe;fjwe;ofjweoijfa;",
-            "author": "Bob Dylan",
-            "comments": [
-                {
-                    "text": "sjdl;fajkfjl",
-                    "author": "Paul McCartney"
-                },
-                {
-                    "text": "jfksdlfjei",
-                    "author": "Patti Smith"
-                }
-            ]
-        },
-        {
-            "id": "112",
-            "name": "Bread",
-            "ingredients": ["flour", "salt", "yeast", "water", "oil"],
-            "content": "djfioaew;goewhgagwegwgwgijeiowejfijwe;fjwe;ofjweoijfa;",
-            "author": "David Bowie",
-            "comments": [
-                {
-                    "text": "sjdl;fajdsfasfjl",
-                    "author": "Paul McCartney"
-                },
-                {
-                    "text": "jfaedlfjei",
-                    "author": "Kate Bush"
-                }
-            ]
-        },
-        {
-            "id": "113",
-            "name": "Pesto",
-            "ingredients": ["basil", "garlic", "parmesan", "olive oil", "pine nuts"],
-            "content": "djfioaew;goewhgijeiowejfijewafwe;fjwe;ofjweoijfa;",
-            "author": "Kate Bush",
-            "comments": [
-                {
-                    "text": "sjdl;fajewael",
-                    "author": "Bob Dylan"
-                },
-                {
-                    "text": "jfagewgfjei",
-                    "author": "David Bowie"
-                }
-            ]
-        }
-    ]
-};
-
-const MOCK_USERS = {
-    "users": [
-        {
-            "firstName": "Bob",
-            "lastName": "Dylan",
-            "userName": "iweifjw"
-        },
-        {
-            "firstName": "Kate",
-            "lastName": "Bush",
-            "userName": "iwwefwafwew"
-        },
-        {
-            "firstName": "David",
-            "lastName": "Bowie",
-            "userName": "iweiasfeafjw"
-        }
-    ]
-};
-
 function renderRecipeEditForm(recipeObj, editForm, recNameShort, authorObj) {
     
     $(editForm).empty();
@@ -89,15 +13,19 @@ function renderRecipeEditForm(recipeObj, editForm, recNameShort, authorObj) {
     
     $(editForm).append(
         `<h2>Edit your recipe: </h2>
-        <label for="name">Name:</label>
-        <input type="text" name="name" id="eName" value="${recipeObj.name}">
-        <label for="ingredients">Ingredients:</label>
-        <input type="text" name="ingredients" id="eIngredients" value="${ingStr}">
-        <label for="content">Instructions:</label>
-        <input type="text" name="content" id="eContent" value="${recipeObj.content}">
-        <button type="submit" id="${recNameShort}-edit-submit">Submit changes</button>`
-    );
-
+        <div class="form-input row">
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="eName" value="${recipeObj.name}">
+        </div>
+        <div class="form-input row">
+            <label for="ingredients">Ingredients:</label>
+            <textarea name="ingredients" id="eIngredients">${ingStr}</textarea>
+        </div>
+        <div class="form-input row">
+            <label for="content">Instructions:</label>
+            <textarea name="content" id="eContent">${recipeObj.content}</textarea>
+            <button type="submit" id="${recNameShort}-edit-submit">Submit changes</button>
+        </div>`);
     $(`#${recNameShort}-edit-submit`).on('click', function(event) {
         event.preventDefault();
         let editObj = {
@@ -193,13 +121,14 @@ function addComment(recipeObj, commentSection, newComment) {
 // Displays a single recipe; editable is a boolean so we know whether
 // we can add an edit button to the recipe or not
 function renderSingleRecipe(recipeObj, recipeContainer, editable) {
+    $('.search-results-container').empty();
     let authorObj;
     let recName = recipeObj.name;
     let recNameShort = recName.replace(/\s+/g, '');
 
     // Set up structure of page
     $(recipeContainer).append(
-        `<div id="${recNameShort}">
+        `<div id="${recNameShort}" class="recipe-div">
             <h1>${recipeObj.name}</h1>
             <h2>By ${recipeObj.author.firstName} ${recipeObj.author.lastName}</h2>
         </div>`);
@@ -210,21 +139,13 @@ function renderSingleRecipe(recipeObj, recipeContainer, editable) {
             `<form id="${recNameShort}-edit-form">
                 <button type="button" id="${recNameShort}-edit-button">Edit</button>
             </form>
-            <button id="${recNameShort}-delete-button">Delete recipe</button>`
-        );
+            <button class="delete-recipe" id="${recNameShort}-delete-button">Delete recipe</button>`);
     }
 
     $(singleRecipeContainer).append(
-        `<ul id="${recNameShort}-ingredients"></ul>
-        <p>${recipeObj.content}</p>
-        <h3>Comments</h3>
-        <form class="comment-submit-form">
-            <label for="new-comment">Submit a comment:</label>
-            <input type="text" name="new-comment" id="${recNameShort}-new-comment">
-            <button type="submit" class="${recNameShort}-submit-comment">Submit</button>
-        </form>
-        <div id="${recNameShort}-comments"></div>`
-    );
+        `<h3>Ingredients:</h3>
+        <ul id="${recNameShort}-ingredients"></ul>
+        <p>${recipeObj.content}</p>`);
 
     // Add ingredient list
     const ingLen = recipeObj.ingredients.length;
@@ -234,16 +155,33 @@ function renderSingleRecipe(recipeObj, recipeContainer, editable) {
     }
 
     // Add comments
-    const commLen = recipeObj.comments.length;
-    let recComm = $(`#${recNameShort}-comments`);
-    for (let j = 0; j < commLen; j++) {
-        const commentObj = recipeObj.comments[j];
-        $(recComm).append(
-            `<div class="comment">
-                <p>${commentObj.author.userName}: ${commentObj.content}</p>
-            </div>`
-        );
+    if (!editable) {
+        $(singleRecipeContainer).append(
+            `<h3>Comments</h3>
+            <form class="comment-submit-form">
+                <label for="new-comment">Submit a comment:</label>
+                <input type="text" name="new-comment" id="${recNameShort}-new-comment">
+                <button type="submit" class="${recNameShort}-submit-comment">Submit</button>
+            </form>
+            <div id="${recNameShort}-comments"></div>`);
+        const commLen = recipeObj.comments.length;
+        let recComm = $(`#${recNameShort}-comments`);
+        for (let j = 0; j < commLen; j++) {
+            const commentObj = recipeObj.comments[j];
+            $(recComm).append(
+                `<div class="comment">
+                    <p>${commentObj.author.userName}: ${commentObj.content}</p>
+                </div>`);
+        }
+
+        $(`.${recNameShort}-submit-comment`).on('click', function(event) {
+            event.preventDefault();
+            let commentSection = $(`#${recNameShort}-comments`);
+            let newComment = $(`#${recNameShort}-new-comment`).val();
+            addComment(recipeObj, commentSection, newComment);
+        });
     }
+    
     $(`#${recNameShort}-edit-button`).on('click', function(event) {
         event.preventDefault();
         let editForm = $(`#${recNameShort}-edit-form`);
@@ -253,13 +191,6 @@ function renderSingleRecipe(recipeObj, recipeContainer, editable) {
     $(`#${recNameShort}-delete-button`).on('click', function(event) {
         event.preventDefault();
         deleteRecipe(recipeObj, authorObj);
-    });
-
-    $(`.${recNameShort}-submit-comment`).on('click', function(event) {
-        event.preventDefault();
-        let commentSection = $(`#${recNameShort}-comments`);
-        let newComment = $(`#${recNameShort}-new-comment`).val();
-        addComment(recipeObj, commentSection, newComment);
     });
     
     returnToHomePage();
@@ -295,11 +226,10 @@ function renderSearchResults(searchResults) {
         const recipeResult = searchResults[i];
         const recipeId = recipeResult.id;
         $('.search-results-container').append(
-            `<div class="js-recipe-result" id="${recipeId}">
+            `<div class="js-recipe-result col-6" id="${recipeId}">
                 <h2>${recipeResult.name}</h2>
                 <p>Author: ${recipeResult.author.firstName} ${recipeResult.author.lastName}</p>
-            </div>`
-        );
+            </div>`);
     }
 
     $('.js-recipe-result').on('click', function(event) {
@@ -340,20 +270,33 @@ function renderPostRecipeForm(authorObj) {
     $('.js-create-recipe-form').empty();
     $('.js-create-recipe-form').append(
         `<h2>Create a new recipe:</h2>
-        <label for="name">Name of the recipe:</label>
-        <input type="text" name="name" id="rName" required>
-        <label for="ingredients">Please enter your ingredients separated by commas:</label>
-        <input type="text" name="ingredients" id="rIngredients" required>
-        <label for="content">Please enter instructions for the recipe here:</label>
-        <input type="text" name="content" id="rContent" required>
+        <div class="form-input row">
+            <label for="name">Name of the recipe:</label>
+            <input type="text" name="name" id="rName" required>
+        </div>
+        <div class="form-input row">
+            <label for="ingredients">Please enter your ingredients separated by commas:</label>
+            <textarea name="ingredients" id="rIngredients" required></textarea>
+        </div>
+        <div class="form-input row">
+            <label for="content">Please enter instructions for the recipe here:</label>
+            <textarea name="content" id="rContent" required></textarea>
+        </div>
         <button type="submit" class="js-new-recipe-submit">Submit your new recipe</button>`
     );
+    let createForm = $('.js-create-recipe-form')[0];
+    createForm.style.display = "block";
 
     $('.js-new-recipe-submit').on('click', function(event) {
         event.preventDefault();
+        createForm.style.display = "none";
+        let ings = $('#rIngredients').val().split(',');
+        let trimmedIngs = ings.map(function(ing) {
+           return ing.trim(); 
+        })
         let newRecipe = {
             name: $('#rName').val(),
-            ingredients: $('#rIngredients').val().split(','),
+            ingredients: trimmedIngs,
             content: $('#rContent').val(),
             author: authorObj
         };
@@ -396,9 +339,9 @@ function renderPostRecipeForm(authorObj) {
 function renderUserRecipes(userRecipes, authorObj) {
     $('.user-recipes-container').empty();
     $('.user-recipes-container').append(
-        `<h1>My Recipes</h1>
+        `<h1 class="white-text">My Recipes</h1>
+        <button type="button" class="js-create-recipe-button">Create a new recipe</button>
         <form class="js-create-recipe-form">
-            <button type="button" class="js-create-recipe-button">Create a new recipe</button>
         </form>`);
     const len = userRecipes.length;
     for (let i = 0; i < len; i++) {
@@ -440,17 +383,18 @@ function returnToHomePage() {
         $('.single-recipe-container').empty();
         $('.user-recipes-container').empty();
         $('.search-container').empty();
+        $('.search-results-container').empty();
         $('.search-container').append(`
-            <form>
-                <button type="button" class="js-all-recipes">See all recipes</button>
-            </form>
-            <h1>Search for recipes: </h1>
-            <form class="recipe-search-form">
-                <label for="search-bar">Enter an ingredient or category: </label>
-                <input type="text" name="search-bar" id="js-search-bar" required>
-                <button type="submit" class="js-search-submit">Submit</button>
-            </form>
-            <div class="search-results-container">
+            <div class="col-12">
+                <h2>Find new recipes and share your own.</h2>
+                <form class="see-all">
+                    <button type="button" class="js-all-recipes">See all recipes</button>
+                </form>
+                <form class="recipe-search-form">
+                    <label for="search-bar">Search for recipes: </label>
+                    <input type="text" name="search-bar" id="js-search-bar" required>
+                    <button type="submit" class="js-search-submit">Submit</button>
+                </form>
             </div>
         `);
         watchRecipeSearch();
@@ -494,6 +438,7 @@ function watchRecipeSearch() {
     $('.user-recipes-button').on('click', function(event) {
         event.preventDefault();
         $('.search-container').empty();
+        $('.search-results-container').empty();
         $('.single-recipe-container').empty();
         let userObj = {
             firstName: "Rachel",
