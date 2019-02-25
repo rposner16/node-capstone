@@ -1,8 +1,11 @@
 'use strict'
 
+// Render the form for editing a recipe
 function renderRecipeEditForm(recipeObj, editForm, recNameShort, authorObj) {
     
     $(editForm).empty();
+
+    // Parsing ingredients array so that it can be displayed as a string
     let ingStr = recipeObj.ingredients[0];
     let ingLen = recipeObj.ingredients.length;
     if (ingLen > 1) {
@@ -26,6 +29,8 @@ function renderRecipeEditForm(recipeObj, editForm, recNameShort, authorObj) {
             <textarea name="content" id="eContent">${recipeObj.content}</textarea>
             <button type="submit" id="${recNameShort}-edit-submit">Submit changes</button>
         </div>`);
+    
+    // When the changes are submitted, set up request object and send put request
     $(`#${recNameShort}-edit-submit`).on('click', function(event) {
         event.preventDefault();
         let editObj = {
@@ -34,15 +39,7 @@ function renderRecipeEditForm(recipeObj, editForm, recNameShort, authorObj) {
             ingredients: $('#eIngredients').val().split(','),
             content: $('#eContent').val()
         };
-        const queryString = `/recipes/myrecipes/${recipeObj.id}`;
-        let init = {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json'
-            },
-            body: JSON.stringify(editObj)
-        };
+
         fetch(`/recipes/myrecipes/${recipeObj.id}`, {
             method: 'PUT',
             headers: {
@@ -53,6 +50,8 @@ function renderRecipeEditForm(recipeObj, editForm, recNameShort, authorObj) {
         })
         .then(response => {
             if (response.ok) {
+                
+                // Re-retrieve the user's recipes with updated information 
                 getUserRecipes(authorObj);
             }
             throw new Error(response.statusText);
@@ -63,6 +62,7 @@ function renderRecipeEditForm(recipeObj, editForm, recNameShort, authorObj) {
     });
 }
 
+// Delete a recipe
 function deleteRecipe(recipeObj, authorObj) {
     let queryString = `/recipes/myrecipes/${recipeObj.id}`;
     let init = {
@@ -80,7 +80,10 @@ function deleteRecipe(recipeObj, authorObj) {
     });
 }
 
+// Add a comment to a recipe (assumes you're user "Rachel Green")
 function addComment(recipeObj, commentSection, newComment) {
+
+    // Setting up request body, method, headers
     let queryString = `/recipes/myrecipes/${recipeObj.id}`;
     recipeObj.comments.push({
         content: newComment, 
@@ -102,9 +105,13 @@ function addComment(recipeObj, commentSection, newComment) {
         },
         body: JSON.stringify(editObj) 
     };
+
+    // Make a put request
     fetch(queryString, init)
     .then(response => {
         if (response.ok) {
+
+            // Add the new comment to the DOM
             $(commentSection).append(
                 `<div class="comment">
                     <p>rGreen: ${newComment}</p>
@@ -120,10 +127,15 @@ function addComment(recipeObj, commentSection, newComment) {
 
 // Displays a single recipe; editable is a boolean so we know whether
 // we can add an edit button to the recipe or not
+// Parameter for recipeContainer is so we know whether to put the recipe in the
+// user recipes container or not
 function renderSingleRecipe(recipeObj, recipeContainer, editable) {
     $('.search-results-container').empty();
     let authorObj;
     let recName = recipeObj.name;
+
+    // Making a version of the recipe name without spaces so it can be used
+    // for ids of associated elements
     let recNameShort = recName.replace(/\s+/g, '');
 
     // Set up structure of page
@@ -133,6 +145,8 @@ function renderSingleRecipe(recipeObj, recipeContainer, editable) {
             <h2>By ${recipeObj.author.firstName} ${recipeObj.author.lastName}</h2>
         </div>`);
     let singleRecipeContainer = $(`#${recNameShort}`);
+
+    // If we're on the author's page, make it possible to edit and delete the recipe
     if (editable) {
         authorObj = recipeObj.author;
         $(singleRecipeContainer).append(
@@ -154,7 +168,7 @@ function renderSingleRecipe(recipeObj, recipeContainer, editable) {
         $(recIng).append(`<li>${recipeObj.ingredients[i]}</li>`);
     }
 
-    // Add comments
+    // Make comments visible if we're not on the author's personal page
     if (!editable) {
         $(singleRecipeContainer).append(
             `<h3>Comments</h3>
@@ -174,6 +188,8 @@ function renderSingleRecipe(recipeObj, recipeContainer, editable) {
                 </div>`);
         }
 
+        // When a comment is submitted, call addComment to add it to the
+        // database and DOM
         $(`.${recNameShort}-submit-comment`).on('click', function(event) {
             event.preventDefault();
             let commentSection = $(`#${recNameShort}-comments`);
@@ -182,6 +198,7 @@ function renderSingleRecipe(recipeObj, recipeContainer, editable) {
         });
     }
     
+    // If the recipe is editable, add event listeners for edit and delete buttons
     $(`#${recNameShort}-edit-button`).on('click', function(event) {
         event.preventDefault();
         let editForm = $(`#${recNameShort}-edit-form`);
@@ -243,8 +260,8 @@ function renderSearchResults(searchResults) {
     })
 }
 
-// Makes a get request to the database
-// using searchQuery and then passes the results to renderSearchResults.
+// Searches the database based on a keyword and passes the results 
+// to renderSearchResults.
 function getSearchResults(searchQuery) {
     const queryString = `/recipes/search/?searchQuery=${searchQuery}`;
     const init = {
@@ -258,7 +275,6 @@ function getSearchResults(searchQuery) {
         throw new Error(response.statusText);
     })
     .then(responseJson => {
-        console.log(responseJson);
         renderSearchResults(responseJson);
     })
     .catch(err => {
@@ -266,7 +282,9 @@ function getSearchResults(searchQuery) {
     });
 }
 
+// Renders the form allowing user to submit a new recipe, posts it
 function renderPostRecipeForm(authorObj) {
+
     $('.js-create-recipe-form').empty();
     $('.js-create-recipe-form').append(
         `<h2>Create a new recipe:</h2>
@@ -284,12 +302,18 @@ function renderPostRecipeForm(authorObj) {
         </div>
         <button type="submit" class="js-new-recipe-submit">Submit your new recipe</button>`
     );
+
+    // Make the form visible; normally it's set to display: none
     let createForm = $('.js-create-recipe-form')[0];
     createForm.style.display = "block";
 
     $('.js-new-recipe-submit').on('click', function(event) {
         event.preventDefault();
+        
+        // Hide form again
         createForm.style.display = "none";
+
+        // Parse ingredients into an array
         let ings = $('#rIngredients').val().split(',');
         let trimmedIngs = ings.map(function(ing) {
            return ing.trim(); 
@@ -300,16 +324,7 @@ function renderPostRecipeForm(authorObj) {
             content: $('#rContent').val(),
             author: authorObj
         };
-        const queryString = "/recipes/myrecipes";
-        const init = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json'
-            },
-            body: newRecipe
-        };
-        console.log(init);
+
         fetch("/recipes/myrecipes", {
             method: 'POST',
             headers: {
@@ -319,14 +334,14 @@ function renderPostRecipeForm(authorObj) {
             body: JSON.stringify(newRecipe)
         })
         .then(response => {
-            console.log(response);
             if (response.ok) {
                 return response.json();
             }
             throw new Error(response.statusText);
         })
         .then(responseJson => {
-            console.log(responseJson);
+            // Once the recipe is submitted, refresh the user recipes
+            // so that it's displayed
             getUserRecipes(authorObj);
         })
         .catch(err => {
@@ -343,15 +358,20 @@ function renderUserRecipes(userRecipes, authorObj) {
         <button type="button" class="js-create-recipe-button">Create a new recipe</button>
         <form class="js-create-recipe-form">
         </form>`);
+    
+    // Iterate through recipes and render each one
     const len = userRecipes.length;
     for (let i = 0; i < len; i++) {
         renderSingleRecipe(userRecipes[i], '.user-recipes-container', true);
     }
     
+    // When create button is clicked, display the create form
     $('.js-create-recipe-button').on('click', function(event) {
         event.preventDefault();
         renderPostRecipeForm(authorObj);
     });
+
+    // Go back to homepage if "Home" text is clicked
     returnToHomePage();
 }
 
@@ -369,7 +389,7 @@ function getUserRecipes(userObj) {
         throw new Error(response.statusText);
     })
     .then(responseJson => {
-        console.log(responseJson);
+        // Render the recipes
         renderUserRecipes(responseJson, userObj);
     })
     .catch(err => {
@@ -377,6 +397,7 @@ function getUserRecipes(userObj) {
     });
 }
 
+// Re-render the homepage when the user clicks the Home button
 function returnToHomePage() {
     $('.homepage-button').on('click', function(event) {
         event.preventDefault();
@@ -404,6 +425,7 @@ function returnToHomePage() {
 // Watches for a query to be submitted on the main search page 
 function watchRecipeSearch() {
     
+    // When search query is submitted, call getSearchResults
     $('.js-search-submit').on('click', function(event) {
         event.preventDefault();
         $('.search-results-container').empty();
@@ -411,8 +433,8 @@ function watchRecipeSearch() {
         getSearchResults(searchQuery);
     });
 
-    // .js-all-recipes is a class for a button that lets you get all the 
-    // recipes in the database
+    // When "see all recipes" button is clicked, retrieve all recipes from 
+    // the database and call renderSearchResults
     $('.js-all-recipes').on('click', function(event) {
         event.preventDefault();
         $('.search-results-container').empty();
@@ -435,6 +457,8 @@ function watchRecipeSearch() {
         });
     });
 
+    // When "My recipes" button is clicked, call getUserRecipes.
+    // Assuming user is "Rachel Green"
     $('.user-recipes-button').on('click', function(event) {
         event.preventDefault();
         $('.search-container').empty();

@@ -12,15 +12,6 @@ const { TEST_DATABASE_URL } = require('../config');
 
 chai.use(chaiHttp);
 
-/*function seedAuthorData() {
-    //console.info('Seeding author data');
-    let a = [];
-    for (let i = 0; i < 10; i++) {
-        a.push(generateAuthorData());
-    }
-    return Author.insertMany(a);
-}*/
-
 function generateAuthorData() {
     return {
         firstName: faker.name.firstName(),
@@ -39,13 +30,13 @@ function seedRecipeData() {
 }
 
 function generateRecipeData() {
-    //let newAuthor = generateAuthorData();
+
     return {
         name: faker.random.word(),
         ingredients: generateIngredients(),
         content: faker.lorem.paragraph(),
         comments: generateComments(),
-        author: generateAuthorData() //faker.random.word()
+        author: generateAuthorData() 
     };
 }
 
@@ -80,10 +71,6 @@ describe('html pages and endpoints', function() {
         return runServer(TEST_DATABASE_URL);
     });
 
-    /*beforeEach(function() {
-        return seedAuthorData();
-    })*/
-
     beforeEach(function() {
         return seedRecipeData();
     });
@@ -107,53 +94,6 @@ describe('html pages and endpoints', function() {
             });
         });
     });
-
-    describe('recipePage.html', function() {
-        it('should have HTML and status 200', function() {
-            let res;
-            return chai.request(app)
-            .get('/index.html')
-            .then(function(_res) {
-                res = _res;
-                expect(res).to.have.status(200);
-            });
-        });
-    });
-
-    describe('userPage.html', function() {
-        it('should have HTML and status 200', function() {
-            let res;
-            return chai.request(app)
-            .get('/index.html')
-            .then(function(_res) {
-                res = _res;
-                expect(res).to.have.status(200);
-            });
-        });
-    });
-
-    /*describe('GET authors', function() {
-        let res;
-        it('should return all authors', function() {
-            return chai.request(app)
-            .get('/authors')
-            .then(function(_res) {
-                res = _res;
-                expect(res).to.have.status(200);
-                expect(res.body).to.have.lengthOf.at.least(1);
-                res.body.forEach(function(author) {
-                    expect(author).to.be.a('object');
-                    //console.log(Object.keys(author));
-                    expect(author).to.include.keys('__v','_id', 'firstName', 'lastName', 'userName');
-                });
-                return Author.findOne();
-            })
-            .then(function(author) {
-                //console.log(Object.entries(author));
-                console.log(author._doc._id);
-            });
-        });
-    });*/
 
     describe('GET all recipes endpoint', function() {
         

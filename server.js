@@ -1,5 +1,6 @@
 'use strict'
 
+// General setup
 const express = require('express');
 
 const mongoose = require('mongoose');
@@ -11,7 +12,6 @@ const { PORT, DATABASE_URL } = require('./config');
 const app = express();
 app.use(express.static('public'));
 
-//app.use(morgan('common'));
 app.use(express.json());
 
 // General get request: retrieves all recipes in the database
@@ -30,8 +30,10 @@ app.get('/recipes', (req, res) => {
 
 // Get search results: retrieves specific recipes based on a user query
 app.get('/recipes/search', (req, res) => {
+  
+  // Creating a regex based on request query, using that to find matching
+  // recipes in the database
   const searchTerm = req.query.searchQuery;
-  // Fix find part once you figure out how to query database correctly
   let rgx = new RegExp(searchTerm);
   Recipe.find( { name: { $regex: rgx, $options: 'i' } } )
   .then(recipes => {
@@ -45,7 +47,10 @@ app.get('/recipes/search', (req, res) => {
   });
 });
 
+// Get all recipes by a specific user/author
 app.get('/recipes/user', (req, res) => {
+
+  // Regex from request query, search for author with matching username
   const searchTerm = req.query.userQuery;
   let rgx = new RegExp(searchTerm);
   Recipe.find( { "author.userName": { $regex: rgx } } )
@@ -60,7 +65,7 @@ app.get('/recipes/user', (req, res) => {
   });
 });
 
-app.get('/authors', (req, res) => {
+/*app.get('/authors', (req, res) => {
   Author.find()
   .then(athrs => {
     res.json(athrs);
@@ -69,7 +74,7 @@ app.get('/authors', (req, res) => {
     console.error(err);
     res.status(500).json({message: 'Internal server error'});
   });
-});
+});*/
 
 // Get an individual recipe by its id
 app.get('/recipes/:id', (req, res) => {
@@ -98,6 +103,7 @@ app.post('/recipes/myrecipes', (req, res) => {
     }
   }
 
+  // Create the recipe in the database
   Recipe.create({
     name: req.body.name,
     author: req.body.author,
@@ -111,14 +117,17 @@ app.post('/recipes/myrecipes', (req, res) => {
   });  
 });
 
+// Edit an existing recipe
 app.put('/recipes/myrecipes/:id', (req, res) => {
 
+  // Make sure request contains correct id in body and params
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     const message = `Request path id (${req.params.id}) and request body id (${req.body.id}) must match.`;
     console.error(message);
     return res.status(400).json({message: message});
   }
 
+  // Determine which fields will be updated
   const toBeUpdated = {};
   const updateableFields = ["name", "ingredients", "content", "comments"];
   updateableFields.forEach(field => {
@@ -127,6 +136,7 @@ app.put('/recipes/myrecipes/:id', (req, res) => {
     }
   });
 
+  // Update the recipe in the database
   Recipe.findByIdAndUpdate(req.params.id, { $set: toBeUpdated })
   .then(recipe => res.status(204).json(recipe.serialize()))
   .catch(err => {
@@ -134,6 +144,7 @@ app.put('/recipes/myrecipes/:id', (req, res) => {
   });
 });
 
+// Delete a recipe
 app.delete('/recipes/myrecipes/:id', (req, res) => {
   Recipe.findByIdAndRemove(req.params.id)
   .then(recipe => {
